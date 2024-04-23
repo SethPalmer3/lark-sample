@@ -166,12 +166,15 @@ class BlockNode(ASTNode):
 
 class AssignmentNode(ASTNode):
     """Placeholder ... not defined in grammar yet"""
-    def __init__(self, blah: str):
-        self.blah = blah
+    def __init__(self, formal: ASTNode, rhs:ASTNode):
+
+        self.lhs = formal
+        self.rhs = rhs
         self.children = []
 
     def __str__(self):
-        return  self.blah
+        return f"{str( self.lhs )} = {str( self.rhs )}"
+
 
 class ExprNode(ASTNode):
     """Just identifiers in this stub"""
@@ -181,6 +184,46 @@ class ExprNode(ASTNode):
 
     def __str__(self):
         return str(self.e)
+
+class AddNode(ASTNode):
+    """Sum Node"""
+    def __init__(self, left: ASTNode, right: ASTNode):
+        self.left = left
+        self.right = right
+        self.children = [left, right]
+
+    def __str__(self):
+        return f"{str(self.left)} + {str(self.right)}"
+
+class SubNode(ASTNode):
+    """Sub Node"""
+    def __init__(self, left: ASTNode, right: ASTNode):
+        self.left = left
+        self.right = right
+        self.children = [left, right]
+
+    def __str__(self):
+        return f"{str(self.left)} - {str(self.right)}"
+
+class MulNode(ASTNode):
+    """Mul Node"""
+    def __init__(self, left: ASTNode, right: ASTNode):
+        self.left = left
+        self.right = right
+        self.children = [left, right]
+
+    def __str__(self):
+        return f"{str(self.left)} * {str(self.right)}"
+
+class DivNode(ASTNode):
+    """Div Node"""
+    def __init__(self, left: ASTNode, right: ASTNode):
+        self.left = left
+        self.right = right
+        self.children = [left, right]
+
+    def __str__(self):
+        return f"{str(self.left)} / {str(self.right)}"
 
 class VariableRefNode(ASTNode):
     """Reference to a variable in an expression.
@@ -267,6 +310,18 @@ class ASTBuilder(Transformer):
         log.debug("->expr")
         return ExprNode(e[0])
 
+    def add(self, e):
+        return AddNode(e[0], e[1])
+
+    def sub(self, e):
+        return SubNode(e[0], e[1])
+
+    def mul(self, e):
+        return MulNode(e[0], e[1])
+
+    def div(self, e):
+        return DivNode(e[0], e[1])
+
     def ident(self, e):
         """A terminal symbol """
         log.debug("->ident")
@@ -284,10 +339,9 @@ class ASTBuilder(Transformer):
 
     def assignment(self, e) -> ASTNode:
         log.debug("->assignment")
-        # Structure of e is [Token('BLAH','blah')]
-        blah = str(e[0])
-        return AssignmentNode(blah)
 
+        lhs, rhs = e
+        return AssignmentNode(lhs, rhs)
 
     def ifstmt(self, e) -> ASTNode:
         log.debug("->ifstmt")
@@ -316,6 +370,7 @@ def main():
     quack_parser = Lark(open("qklib/quack_grammar.txt", "r"))
     text = "".join(args.source.readlines())
     tree = quack_parser.parse(text)
+    print(tree)
     print(tree.pretty("   "))
     ast: ASTNode = ASTBuilder().transform(tree)
     print(ast)
@@ -329,11 +384,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-

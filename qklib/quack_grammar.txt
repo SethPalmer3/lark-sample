@@ -28,8 +28,12 @@ block: _stmt*
 
 _stmt: ifstmt
       | assignment ";"
+      | expr ";"
 
-assignment: IDENT // Placeholder
+assignment: formal "=" rhs 
+
+?rhs: expr
+   | NUMBER
 
 // An 'if' statement may have zero or more elifs and
 // zero or one else
@@ -41,6 +45,15 @@ otherwise:  -> block   // This creates an annoying empty block
 
 _cond: expr
 expr: ident -> variable_ref
+   | NUMBER
+   | expr "+" product -> add
+   | expr "-" product -> sub
+   | product
+
+?product: expr "*" expr -> mul
+      | expr "/" expr -> div
+      | expr
+
 ident: IDENT
 
 method: "def" name "(" formals ")" returns "{" block "}"
@@ -48,5 +61,7 @@ returns: (":"  name)?
 
 IDENT: /[_a-zA-Z][_a-zA-Z0-9]*/
 
+
 %import common.WS
+%import common.NUMBER
 %ignore WS
