@@ -29,11 +29,13 @@ block: _stmt*
 _stmt: ifstmt
       | assignment ";"
       | expr ";"
+      | call ";"
 
-assignment: formal "=" rhs 
+assignment: formal "=" expr 
 
-?rhs: expr
-   | NUMBER
+
+call: name "(" [expr ("," expr)*] ")" 
+
 
 // An 'if' statement may have zero or more elifs and
 // zero or one else
@@ -49,6 +51,7 @@ expr: ident -> variable_ref
    | expr "+" product -> add
    | expr "-" product -> sub
    | product
+   | call
 
 ?product: expr "*" expr -> mul
       | expr "/" expr -> div

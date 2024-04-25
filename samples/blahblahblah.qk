@@ -6,7 +6,7 @@ def move(x: Int, y: Int) {
   elif blah { blah; }
   else {blah;}
   blah;
-  z: Int = x + y * 6;
+  z: Int = x + y * 6 / blah(x);
 }
 blah; blah; blah;
 }

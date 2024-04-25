@@ -185,45 +185,19 @@ class ExprNode(ASTNode):
     def __str__(self):
         return str(self.e)
 
-class AddNode(ASTNode):
-    """Sum Node"""
-    def __init__(self, left: ASTNode, right: ASTNode):
-        self.left = left
-        self.right = right
-        self.children = [left, right]
-
-    def __str__(self):
-        return f"{str(self.left)} + {str(self.right)}"
-
-class SubNode(ASTNode):
-    """Sub Node"""
-    def __init__(self, left: ASTNode, right: ASTNode):
-        self.left = left
-        self.right = right
-        self.children = [left, right]
-
-    def __str__(self):
-        return f"{str(self.left)} - {str(self.right)}"
-
-class MulNode(ASTNode):
-    """Mul Node"""
-    def __init__(self, left: ASTNode, right: ASTNode):
-        self.left = left
-        self.right = right
-        self.children = [left, right]
-
-    def __str__(self):
-        return f"{str(self.left)} * {str(self.right)}"
-
-class DivNode(ASTNode):
-    """Div Node"""
-    def __init__(self, left: ASTNode, right: ASTNode):
-        self.left = left
-        self.right = right
-        self.children = [left, right]
-
-    def __str__(self):
-        return f"{str(self.left)} / {str(self.right)}"
+class MethodCallNode(ASTNode):
+    """Node for calling a method"""
+    def __init__(self, name: str, params: list[ ASTNode ]):
+        self.name = name
+        self.params = params
+        self.children = params
+    def __str__(self) -> str:
+        ret_str = f"{self.name}("
+        for i in range(len(self.params)):
+            ret_str += str(self.params[i])
+            if i < len(self.params) - 1:
+                ret_str += ", "
+        return ret_str + ")"
 
 class VariableRefNode(ASTNode):
     """Reference to a variable in an expression.
@@ -291,6 +265,11 @@ class ASTBuilder(Transformer):
         name, formals, returns, body = e
         return MethodNode(name, formals, returns, body)
 
+    def call(self, e):
+        log.debug("->method call")
+        return MethodCallNode(e[0], e[1:])
+
+
     def returns(self, e):
         if not e:
             return "Nothing"
@@ -311,16 +290,16 @@ class ASTBuilder(Transformer):
         return ExprNode(e[0])
 
     def add(self, e):
-        return AddNode(e[0], e[1])
+        return MethodCallNode("PLUS", e)
 
     def sub(self, e):
-        return SubNode(e[0], e[1])
+        return MethodCallNode("SUB", e)
 
     def mul(self, e):
-        return MulNode(e[0], e[1])
+        return MethodCallNode("TIMES", e)
 
     def div(self, e):
-        return DivNode(e[0], e[1])
+        return MethodCallNode("DIV", e)
 
     def ident(self, e):
         """A terminal symbol """
@@ -370,7 +349,6 @@ def main():
     quack_parser = Lark(open("qklib/quack_grammar.txt", "r"))
     text = "".join(args.source.readlines())
     tree = quack_parser.parse(text)
-    print(tree)
     print(tree.pretty("   "))
     ast: ASTNode = ASTBuilder().transform(tree)
     print(ast)
